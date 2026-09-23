@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal House - Prototipo Funcional</title>
+    <style>
+        :root {
+            --primary-color: #a855f7; 
+            --secondary-color: #8b5cf6; 
+            --accent-color: #f97316; 
+            --bg-gradient: linear-gradient(180deg, #f3e8ff 0%, #ffffff 100%);
+            --bg-splash: linear-gradient(135deg, #ffccd5 0%, #f3e8ff 100%);
+            --text-dark: #1f2937;
+            --text-light: #ffffff;
+            --bg-input: #ffffff;
+            --border-radius-main: 25px;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: #e5e7eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .mobile-container {
+            width: 100%;
+            max-width: 375px;
+            height: 812px;
+            background: var(--bg-gradient);
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 8px solid #333;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-dark);
+            background: transparent;
+            z-index: 10;
+        }
+
+        .view {
+            display: none; 
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding-top: 40px; 
+            background: var(--bg-gradient);
+            overflow-y: auto;
+        }
+
+        .view.active { display: flex; }
+        .view::-webkit-scrollbar { display: none; }
+        .view { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .title {
+            color: var(--secondary-color);
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            padding: 15px 30px;
+            border-radius: var(--border-radius-main);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 80%;
+            margin: 10px auto;
+            display: block;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+        
+        .btn:active { transform: scale(0.95); }
+        .btn-orange { background-color: var(--accent-color); }
+        .btn-outline { background-color: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); }
+
+        .input-group {
+            width: 80%;
+            margin: 0 auto 15px auto;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: var(--border-radius-main);
+            background-color: var(--bg-input);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 14px;
+            outline: none;
+            border: 1px solid #eee;
+        }
+
+        .link-text {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 20px;
+            color: var(--text-dark);
+        }
+        .link-text a { color: var(--primary-color); font-weight: bold; text-decoration: none; }
+
+        .back-btn {
+            position: absolute;
+            top: 45px;
+            left: 20px;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: var(--shadow);
+        }
+
+        .img-contain { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        #splash { 
+            background: var(--bg-splash); 
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .splash-brand {
+            position: absolute;
+            top: 42%;
+            width: 100%;
+            text-align: center;
+        }
+        .splash-brand h1 {
+            color: var(--secondary-color);
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-shadow: 0 0 4px rgba(139, 92, 246, 0.75), 0 0 12px rgba(168, 85, 247, 0.65);
+        }
+        .splash-brand p {
+            color: var(--accent-color);
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 4px rgba(249, 115, 22, 0.7), 0 0 10px rgba(249, 115, 22, 0.45);
+        }
+
+        .main-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .menu-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 25px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .pet-list { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .pet-card {
+            background: white; border-radius: 20px; overflow: hidden;
+            box-shadow: var(--shadow); position: relative;
+        }
+        .pet-card-img-container { 
+            width: 100%; height: 220px; 
+            background-color: #fcfbfe; 
+            display: flex; justify-content: center; align-items: center;
+            padding: 10px;
+        }
+        .pet-card-info { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .pet-name-tag {
+            background-color: var(--primary-color); color: white; padding: 5px 15px;
+            border-radius: 15px; font-weight: bold; font-size: 14px; margin-top: -20px;
+            position: relative; z-index: 2; display: inline-block; margin-left: 15px;
+            border: 2px solid white;
+        }
+
+        .pet-detail-header { 
+            width: 100%; height: 250px; 
+            background-color: #fcfbfe; 
+            position: relative; display: flex; justify-content: center;
+        }
+        .pet-detail-content {
+            background: white; border-radius: 30px 30px 0 0; margin-top: -30px;
+            padding: 30px 20px; position: relative; min-height: 500px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .info-row {
+            display: flex; justify-content: space-between; margin-bottom: 15px;
+            border-bottom: 1px solid #eee; padding-bottom: 10px;
+        }
+        .info-label { color: #666; font-size: 14px; }
+        .info-value { font-weight: bold; color: var(--text-dark); }
+
+        .form-container { padding: 20px; background: white; border-radius: 30px 30px 0 0; flex: 1; margin-top: 20px; }
+        .chart-container { background: white; border-radius: 20px; padding: 20px; margin: 20px; box-shadow: var(--shadow); text-align: center; }
+        .bar-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 200px; margin-top: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+
+        .reports-intro {
+            padding: 20px;
+        }
+        .reports-summary {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+            text-align: left;
+        }
+        .reports-summary strong {
+            display: block;
+            color: var(--text-dark);
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .reports-summary span {
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+        .report-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            min-height: 64px;
+            margin: 0 0 12px;
+            padding: 14px 16px;
+            border: 1px solid #eadcfb;
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--text-dark);
+            text-align: left;
+            box-shadow: 0 3px 10px rgba(31, 41, 55, 0.06);
+            cursor: pointer;
+        }
+        .report-link strong { display: block; color: var(--primary-color); font-size: 14px; margin-bottom: 3px; }
+        .report-link small { color: #6b7280; font-size: 11px; }
+        .report-link span { color: var(--primary-color); font-size: 20px; font-weight: bold; }
+        .report-header {
+            padding: 14px 20px 4px;
+        }
+        .report-header h3 { color: var(--text-dark); font-size: 18px; margin-bottom: 5px; }
+        .report-header p { color: #6b7280; font-size: 12px; line-height: 1.4; }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 14px 20px 4px;
+        }
+        .metric-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 3px 10px rgba(31, 41, 55, 0.07);
+            border-top: 3px solid var(--primary-color);
+        }
+        .metric-card span { display: block; color: #6b7280; font-size: 10px; margin-bottom: 5px; }
+        .metric-card strong { color: var(--text-dark); font-size: 20px; }
+        .metric-card em { display: block; color: #16a34a; font-size: 10px; font-style: normal; margin-top: 3px; }
+        .dashboard-chart {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 18px 14px 14px;
+            margin: 16px 20px;
+            box-shadow: var(--shadow);
+        }
+        .chart-scale {
+            display: flex;
+            justify-content: space-between;
+            color: #9ca3af;
+            font-size: 9px;
+            margin-bottom: 5px;
+        }
+        .bar-chart-modern {
+            height: 230px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 28px;
+            padding: 12px 22px 0;
+            border-bottom: 1px solid #d1d5db;
+            background: repeating-linear-gradient(to top, transparent 0, transparent 45px, #f1f3f5 46px);
+        }
+        .bar-column { height: 100%; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+        .bar-value { color: var(--text-dark); font-size: 12px; font-weight: 800; margin-bottom: 6px; }
+        .bar { width: min(58px, 75%); min-height: 20px; border-radius: 7px 7px 0 0; }
+        .bar-green { background: #22c55e; }
+        .bar-blue { background: #3b82f6; }
+        .bar-orange { background: #f59e0b; }
+        .bar-label { color: #4b5563; font-size: 10px; margin-top: 8px; }
+        .chart-note { color: #6b7280; font-size: 11px; text-align: center; margin-top: 12px; }
+        .donut-wrap { display: flex; justify-content: center; align-items: center; padding: 16px 0 8px; }
+        .donut-wrap svg { display: block; width: 190px; height: 190px; }
+        .donut-center { font-size: 4.8px; font-weight: 800; fill: var(--text-dark); text-anchor: middle; }
+        .donut-caption { font-size: 2px; fill: #6b7280; text-anchor: middle; }
+        .legend-list { display: grid; gap: 9px; margin-top: 10px; }
+        .legend-item { display: flex; align-items: center; justify-content: space-between; color: #4b5563; font-size: 12px; }
+        .legend-label { display: flex; align-items: center; gap: 8px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+        .legend-item strong { color: var(--text-dark); }
+        
+        .social-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .social-btn {
+            width: 45px;
+            height: 45px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .social-btn img {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+        }
+        .social-btn:hover { transform: scale(1.1); }
+        .btn-fb { color: #1877F2; border: 2px solid #1877F2; }
+        .btn-ig { color: #E4405F; border: 2px solid #E4405F; }
+        .btn-wsp { color: #25D366; border: 2px solid #25D366; }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        
+        <div class="status-bar">
+            <span>9:27</span>
+            <span>📱 🔋</span>
+        </div>
+
+        <div id="splash" class="view active" onclick="navigate('login')">
+            <div class="splash-brand">
+                <h1>ANIMAL HOUSE</h1>
+                <p>CLÍNICA VETERINARIA</p>
+            </div>
+            
+            <p style="position: absolute; bottom: 20px; font-size: 12px; color: #666; width: 100%; text-align: center;">Toque para continuar</p>
+        </div>
+
+        <div id="login" class="view">
+            <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+                <img src="PaginaPrincipal.jpg" alt="Logo" style="width: 120px; border-radius: 20px;">
+            </div>
+            <h1 class="title">Log in</h1>
+            <div class="input-group">
+                <input type="email" id="login-email" class="input-field" placeholder="👤 Email (@gmail.com / @hotmail.com)">
+            </div>
+            <div class="input-group">
+                <input type="password" class="input-field" placeholder="🔑 Password">
+            </div>
+            
+            <button class="btn" onclick="loginApp()">LOG IN</button>
+            <p class="link-text">¿No tienes una cuenta? <a href="#" onclick="navigate('register')">Regístrate aquí</a></p>
+        </div>
+
+        <div id="register" class="view">
+            <button class="back-btn" onclick="navigate('login')">↩</button>
+            <h1 class="title" style="margin-top: 60px;">Register</h1>
+            <div class="input-group" style="margin-top: 30px;">
+                <input type="text" class="input-field" placeholder="Nombre completo">
+            </div>
+            <div class="input-group">
+                <input type="email" class="input-field" placeholder="Correo electrónico">
+            </div>
+            <div class="input-group">
+                <input type="password" class="input-field" placeholder="Contraseña">
+            </div>
+            
+            <button class="btn" onclick="registerApp()">REGISTER</button>
+            <p class="link-text">¿Ya tienes una cuenta? <a href="#" onclick="navigate('login')">Ingresa aquí</a></p>
+        </div>
+
+        <div id="main-menu" class="view">
+            <div style="text-align: center; margin-top: 10px;">
+                <img src="PaginaPrincipal.jpg" alt="Logo Principal" style="width: 150px; border-radius: 20px; box-shadow: var(--shadow);">
+            </div>
+            
+            <div class="main-menu">
+                <button class="menu-btn" onclick="navigate('ayudanos')">
+                    <span style="font-size: 24px;">🐾</span>Ayudanos
+                </button>
+                <button class="menu-btn" onclick="navigate('reports')">
+                    <span style="font-size: 24px;">📊</span>Informes
+                </button>
+                <button class="menu-btn" onclick="navigate('denuncias-menu')">
+                    <span style="font-size: 24px;">📢</span>Denuncias
+                </button>
+                <button class="menu-btn" onclick="navigate('about')">
+                    <span style="font-size: 24px;">🏠</span>Nosotros
+                </button>
+            </div>
+            <div style="padding: 0 20px; margin-top: 20px;">
+                <button class="btn btn-orange" style="width: 100%; margin: 5px 0; border-radius: 10px;">📞 933 430 710</button>
+                <button class="btn btn-orange" style="width: 100%; margin: 5px 0; border-radius: 10px;">📍 Canto Grande - SJL</button>
+            </div>
+            <p class="link-text" style="margin-top: auto; margin-bottom: 20px;">
+                <a href="#" onclick="navigate('login')">🚪 Cerrar Sesión</a>
+            </p>
+        </div>
+
+        <div id="ayudanos" class="view">
+            <button class="back-btn" onclick="navigate('main-menu')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px; border-radius: 0 0 20px 20px;">Ayudanos</h2>
+            <div style="padding: 15px;">
+                <p style="font-size: 12px; color: #555; text-align: justify; margin-bottom: 15px;">
+                    Para poder adoptar se requiere ser mayor de edad y contar con un lugar adecuado para la mascota, para luego firmar con el contrato de adopción.
+                </p>
+                <button class="btn" style="width: 100%; margin-bottom: 30px;" onclick="navigate('adopt-list')">🤍 Adóptame</button>
+                <p style="font-size: 12px; color: #555; text-align: justify; margin-bottom: 15px;">
+                    Para poder apadrinar una mascota registra tus datos, acuerda la forma de pago para la manutención, te mantendremos informados siempre.
+                </p>
+                <button class="btn" style="width: 100%;" onclick="navigate('apadrinar-list')">🤍 Apadríname</button>
+            </div>
+        </div>
+
+        <div id="adopt-list" class="view">
+            <button class="back-btn" onclick="navigate('ayudanos')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px; border-radius: 0 0 20px 20px;">Adóptame</h2>
+            <div class="pet-list">
+                <div class="pet-card">
+                    <div class="pet-card-img-container"><img src="adoptame.png" class="img-contain"></div>
+                    <div class="pet-name-tag">Beto</div>
+                    <div class="pet-card-info" style="justify-content: center;">
+                        <span style="color: var(--primary-color); font-size: 28px; cursor: pointer;" onclick="showAdoptInfo('beto')">🤍</span>
+                    </div>
+                </div>
+                <div class="pet-card">
+                    <div class="pet-card-img-container"><img src="adoptame1.png" class="img-contain"></div>
+                    <div class="pet-name-tag">Luna</div>
+                    <div class="pet-card-info" style="justify-content: center;">
+                        <span style="color: var(--primary-color); font-size: 28px; cursor: pointer;" onclick="showAdoptInfo('luna')">🤍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="adopt-info" class="view">
+            <button class="back-btn" onclick="navigate('adopt-list')">↩</button>
+            <div class="pet-detail-header">
+                <img id="adopt-info-image" src="adoptame1.png" alt="Imagen de Luna" class="img-contain" style="padding-top: 20px; width: 80%;">
+            </div>
+            <div class="pet-detail-content">
+                <h2 id="adopt-info-name" style="color: var(--primary-color); font-size: 24px; margin-bottom: 10px;">Luna</h2>
+                <p id="adopt-info-description" style="font-size: 13px; color: #666; margin-bottom: 20px; text-align: justify;">Luna es una perrita muy tierna y cariñosa, tiene un comportamiento muy tranquilo y amoroso, necesita atención y mucho cariño.</p>
+                <div class="info-row"><span class="info-label">Edad</span><span id="adopt-info-age" class="info-value">2 años</span></div>
+                <div class="info-row"><span class="info-label">Sexo</span><span id="adopt-info-sex" class="info-value">Hembra ♀</span></div>
+                <div class="info-row"><span class="info-label">Tamaño</span><span id="adopt-info-size" class="info-value">Mediano 🐾</span></div>
+                <div class="info-row"><span class="info-label">Salud</span><span id="adopt-info-health" class="info-value">Óptima</span></div>
+                
+                <button class="btn" style="width: 100%; margin-top: 30px;" onclick="navigate('form-adoptar-datos')">REGISTRAR ADOPCIÓN</button>
+            </div>
+        </div>
+
+        <div id="form-adoptar-datos" class="view">
+            <button class="back-btn" onclick="navigate('adopt-info')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Registrar Adopción</h2>
+            <div class="form-container" style="background: transparent;">
+                <input type="text" class="input-field" style="margin-bottom: 15px;" placeholder="Nombre">
+                <input type="number" class="input-field" style="margin-bottom: 15px;" placeholder="DNI">
+                <input type="number" class="input-field" style="margin-bottom: 15px;" placeholder="Edad">
+                <input type="tel" class="input-field" style="margin-bottom: 15px;" placeholder="Teléfono">
+                <input type="text" class="input-field" style="margin-bottom: 30px;" placeholder="Domicilio">
+                
+                <button class="btn" style="width: 100%; background-color: var(--primary-color);" onclick="submitAdopcion()">REGISTRAR</button>
+            </div>
+        </div>
+
+        <div id="apadrinar-list" class="view">
+            <button class="back-btn" onclick="navigate('ayudanos')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px; border-radius: 0 0 20px 20px;">Apadríname</h2>
+            <div class="pet-list">
+                <div class="pet-card">
+                    <div class="pet-card-img-container"><img src="apadriname1.png" class="img-contain"></div>
+                    <div class="pet-name-tag">Max</div>
+                    <div class="pet-card-info" style="justify-content: center;">
+                        <span style="color: var(--primary-color); font-size: 28px; cursor: pointer;" onclick="showSponsorInfo('max')">🤍</span>
+                    </div>
+                </div>
+                <div class="pet-card">
+                    <div class="pet-card-img-container"><img src="apadriname2.png" class="img-contain"></div>
+                    <div class="pet-name-tag">Rocky</div>
+                    <div class="pet-card-info" style="justify-content: center;">
+                        <span style="color: var(--primary-color); font-size: 28px; cursor: pointer;" onclick="showSponsorInfo('rocky')">🤍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="apadrinar-info" class="view">
+            <button class="back-btn" onclick="navigate('apadrinar-list')">↩</button>
+            <div class="pet-detail-header">
+                <img id="sponsor-info-image" src="apadriname1.png" alt="Imagen de Max" class="img-contain" style="padding-top: 20px; width: 80%;">
+            </div>
+            <div class="pet-detail-content">
+                <h2 id="sponsor-info-name" style="color: var(--primary-color); font-size: 24px; margin-bottom: 10px;">Max</h2>
+                <p id="sponsor-info-description" style="font-size: 13px; color: #666; margin-bottom: 20px;">Max fue rescatado de las calles, es un perrito muy juguetón que necesita apoyo para sus vacunas y alimentación diaria.</p>
+                <div class="info-row"><span class="info-label">Edad</span><span id="sponsor-info-age" class="info-value">1 año</span></div>
+                <div class="info-row"><span class="info-label">Tamaño</span><span id="sponsor-info-size" class="info-value">Pequeño</span></div>
+                <div class="info-row"><span class="info-label">Salud</span><span id="sponsor-info-health" class="info-value">Estable</span></div>
+                <button class="btn" style="width: 100%; margin-top: 30px;" onclick="navigate('form-apadrinar-datos')">REGISTRAR APADRINAMIENTO</button>
+            </div>
+        </div>
+
+        <div id="form-apadrinar-datos" class="view">
+            <button class="back-btn" onclick="navigate('apadrinar-info')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Datos del Padrino</h2>
+            <div class="form-container" style="background: transparent;">
+                <input type="text" class="input-field" style="margin-bottom: 15px;" placeholder="Nombre">
+                <input type="number" class="input-field" style="margin-bottom: 15px;" placeholder="DNI">
+                <input type="number" class="input-field" style="margin-bottom: 15px;" placeholder="Edad">
+                <input type="tel" class="input-field" style="margin-bottom: 15px;" placeholder="Teléfono">
+                <input type="text" class="input-field" style="margin-bottom: 30px;" placeholder="Domicilio">
+                
+                <p style="text-align: center; font-weight: bold; color: var(--text-dark); margin-bottom: 15px;">Seleccione Método de Pago:</p>
+                <button class="btn" style="width: 100%; margin-bottom: 15px;" onclick="navigate('form-apadrinar-tarjeta')">💳 PAGAR CON TARJETA</button>
+                <button class="btn" style="width: 100%; background-color: #00e0a4;" onclick="navigate('form-apadrinar-yape')">📱 PAGAR CON YAPE</button>
+            </div>
+        </div>
+
+        <div id="form-apadrinar-tarjeta" class="view">
+            <button class="back-btn" onclick="navigate('form-apadrinar-datos')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Tarjeta de Crédito</h2>
+            <div class="form-container" style="background: transparent;">
+                <input type="number" class="input-field" style="margin-bottom: 15px;" placeholder="Monto (S/)">
+                <input type="text" class="input-field" style="margin-bottom: 15px;" placeholder="Número de Tarjeta">
+                <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                    <input type="text" class="input-field" style="flex: 1;" placeholder="Fecha Expiración">
+                    <input type="text" class="input-field" style="flex: 1;" placeholder="CVV">
+                </div>
+                <button class="btn" style="width: 100%;" onclick="submitPago()">REGISTRAR PAGO</button>
+            </div>
+        </div>
+
+        <div id="form-apadrinar-yape" class="view">
+            <button class="back-btn" onclick="navigate('form-apadrinar-datos')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: #00e0a4; color: white; padding: 15px;">Yape</h2>
+            <div class="form-container" style="background: transparent; text-align: center;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                    <div style="padding: 10px 20px; border: 1px solid #00e0a4; border-radius: 10px; background: white; color: #00e0a4; font-weight: bold;">S/ 30</div>
+                    <div style="padding: 10px 20px; border: 1px solid #ddd; border-radius: 10px; background: white;">S/ 50</div>
+                    <div style="padding: 10px 20px; border: 1px solid #ddd; border-radius: 10px; background: white;">S/ 100</div>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 20px;">
+                    <h3 style="color: var(--primary-color); font-size: 24px; margin-bottom: 5px;">935 472 796</h3>
+                    <p style="font-weight: bold; color: var(--text-dark); margin-bottom: 20px;">Huiñac Jaimes Jhonny</p>
+                    <img src="qryape.jpg" style="width: 200px; height: 200px; object-fit: contain; border: 2px solid #00e0a4; border-radius: 10px;">
+                </div>
+                <button class="btn" style="width: 100%; background-color: #00e0a4;" onclick="submitPago()">CONFIRMAR PAGO</button>
+            </div>
+        </div>
+
+        <div id="denuncias-menu" class="view">
+            <button class="back-btn" onclick="navigate('main-menu')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px; border-radius: 0 0 20px 20px;">Denuncias</h2>
+            <div style="padding: 20px;">
+                <button class="btn" style="width: 100%; margin-bottom: 20px;" onclick="navigate('form-denuncia')">📝 Registrar Denuncia</button>
+                <button class="btn btn-outline" style="width: 100%; margin-bottom: 20px;" onclick="navigate('lista-denuncias')">👁 Ver Denuncias</button>
+            </div>
+        </div>
+
+        <div id="form-denuncia" class="view">
+            <button class="back-btn" onclick="navigate('denuncias-menu')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Registro de Denuncia</h2>
+            <div class="form-container" style="background: transparent; box-shadow: none; padding-top: 0;">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" class="input-field" placeholder="Nombre">
+                    <input type="text" class="input-field" placeholder="Apellido">
+                </div>
+                <input type="email" class="input-field" style="margin-bottom: 15px;" placeholder="Correo">
+                <input type="tel" class="input-field" style="margin-bottom: 15px;" placeholder="Número de Teléfono">
+                <input type="text" class="input-field" style="margin-bottom: 15px;" placeholder="Condiciones">
+                <input type="text" class="input-field" style="margin-bottom: 15px;" placeholder="Dirección">
+                
+                <button class="btn btn-outline" style="width: 100%; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    📷 Adjuntar Imagen
+                </button>
+                
+                <button class="btn" style="width: 100%;" onclick="submitDenuncia()">REGISTRAR DENUNCIA</button>
+            </div>
+        </div>
+
+        <div id="lista-denuncias" class="view">
+            <button class="back-btn" onclick="navigate('denuncias-menu')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Casos Reportados</h2>
+            <div style="padding: 15px; display: flex; flex-direction: column; gap: 15px;">
+                <div style="background: white; border-radius: 15px; padding: 15px; box-shadow: var(--shadow);">
+                    <img src="denuncias.jpg" style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;">
+                    <h4 style="font-size: 14px; margin-bottom: 5px; color: var(--primary-color);">Abandono</h4>
+                    <p style="font-size: 11px; color: #666;">Reportado por: Castillo Shantall</p>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 15px; box-shadow: var(--shadow);">
+                    <img src="denuncias1.jpg" style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;">
+                    <h4 style="font-size: 14px; margin-bottom: 5px; color: var(--primary-color);">Maltrato</h4>
+                    <p style="font-size: 11px; color: #666;">Reportado por: Usuario Anónimo</p>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 15px; box-shadow: var(--shadow);">
+                    <img src="denuncias2.jpg" style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;">
+                    <h4 style="font-size: 14px; margin-bottom: 5px; color: var(--primary-color);">Perro perdido</h4>
+                    <p style="font-size: 11px; color: #666;">Reportado por: Carlos Ruiz</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="reports" class="view">
+            <button class="back-btn" onclick="navigate('main-menu')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px; border-radius: 0 0 20px 20px;">Informes 2025 - 2026</h2>
+            <div class="reports-intro">
+                <div class="reports-summary">
+                    <strong>Resumen de impacto</strong>
+                    <span>Indicadores comparativos de adopciones, apadrinamientos y alcance territorial de Animal House.</span>
+                </div>
+                <button class="report-link" onclick="navigate('grafico-adoptantes')">
+                    <span><strong>Adopciones concretadas</strong><small>Comparativo anual de nuevos hogares</small></span>
+                    <span>›</span>
+                </button>
+                <button class="report-link" onclick="navigate('grafico-apadrinadores')">
+                    <span><strong>Programa de apadrinamiento</strong><small>Evolución de padrinos registrados</small></span>
+                    <span>›</span>
+                </button>
+                <button class="report-link" onclick="navigate('grafico-distritos')">
+                    <span><strong>Alcance por distrito</strong><small>Distribución de adopciones por zona</small></span>
+                    <span>›</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="grafico-adoptantes" class="view">
+            <button class="back-btn" onclick="navigate('reports')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Adoptantes 25-26</h2>
+            <div class="report-header">
+                <h3>Adopciones registradas</h3>
+                <p>Comparación anual de mascotas que encontraron un hogar responsable.</p>
+            </div>
+            <div class="metric-grid">
+                <div class="metric-card"><span>Total del período</span><strong>470</strong><em>2025 - 2026</em></div>
+                <div class="metric-card"><span>Crecimiento anual</span><strong>+13.6%</strong><em>30 adopciones más</em></div>
+            </div>
+            <div class="dashboard-chart">
+                <div class="chart-scale"><span>250</span><span>200</span><span>150</span><span>100</span><span>50</span><span>0</span></div>
+                <div class="bar-chart-modern">
+                    <div class="bar-column"><span class="bar-value">220</span><div class="bar bar-green" style="height: 88%;"></div><span class="bar-label">2025</span></div>
+                    <div class="bar-column"><span class="bar-value">250</span><div class="bar bar-blue" style="height: 100%;"></div><span class="bar-label">2026</span></div>
+                </div>
+                <p class="chart-note">El año 2026 concentra el mayor número de adopciones.</p>
+            </div>
+        </div>
+
+        <div id="grafico-apadrinadores" class="view">
+            <button class="back-btn" onclick="navigate('reports')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Apadrinadores 25-26</h2>
+            <div class="report-header">
+                <h3>Padrinos activos</h3>
+                <p>Personas que contribuyen al cuidado, alimentación y recuperación de las mascotas.</p>
+            </div>
+            <div class="metric-grid">
+                <div class="metric-card"><span>Total del período</span><strong>400</strong><em>2025 - 2026</em></div>
+                <div class="metric-card"><span>Crecimiento anual</span><strong>+10.5%</strong><em>20 padrinos más</em></div>
+            </div>
+            <div class="dashboard-chart">
+                <div class="chart-scale"><span>210</span><span>175</span><span>140</span><span>105</span><span>70</span><span>0</span></div>
+                <div class="bar-chart-modern">
+                    <div class="bar-column"><span class="bar-value">190</span><div class="bar bar-orange" style="height: 90%;"></div><span class="bar-label">2025</span></div>
+                    <div class="bar-column"><span class="bar-value">210</span><div class="bar bar-blue" style="height: 100%;"></div><span class="bar-label">2026</span></div>
+                </div>
+                <p class="chart-note">El programa mantiene una tendencia positiva de crecimiento.</p>
+            </div>
+        </div>
+
+        <div id="grafico-distritos" class="view">
+            <button class="back-btn" onclick="navigate('reports')">↩</button>
+            <h2 class="title" style="font-size: 18px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Mayor adopción 2025-2026</h2>
+            <div class="report-header">
+                <h3>Distribución territorial</h3>
+                <p>Adopciones registradas según el distrito de procedencia de las familias.</p>
+            </div>
+            <div class="metric-grid">
+                <div class="metric-card"><span>Total de adopciones</span><strong>200</strong><em>Período 2025 - 2026</em></div>
+                <div class="metric-card"><span>Zona líder</span><strong>60%</strong><em>SJL · 120 adopciones</em></div>
+            </div>
+            <div class="dashboard-chart">
+                <div class="donut-wrap">
+                    <svg width="190" height="190" viewBox="0 0 36 36" aria-label="Distribución de adopciones por distrito">
+                      <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f3f4f6" stroke-width="8"/>
+                      <path stroke="#f59e0b" stroke-width="8" stroke-dasharray="60, 100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      <path stroke="#ef4444" stroke-width="8" stroke-dasharray="20, 100" stroke-dashoffset="-60" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      <path stroke="#22c55e" stroke-width="8" stroke-dasharray="20, 100" stroke-dashoffset="-80" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      <text x="18" y="17" class="donut-center">200</text>
+                      <text x="18" y="21" class="donut-caption">adopciones</text>
+                    </svg>
+                </div>
+                <div class="legend-list">
+                    <div class="legend-item"><span class="legend-label"><i class="legend-dot" style="background: #f59e0b;"></i>SJL</span><strong>120 · 60%</strong></div>
+                    <div class="legend-item"><span class="legend-label"><i class="legend-dot" style="background: #ef4444;"></i>V.E.S.</span><strong>40 · 20%</strong></div>
+                    <div class="legend-item"><span class="legend-label"><i class="legend-dot" style="background: #22c55e;"></i>Otros distritos</span><strong>40 · 20%</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="about" class="view">
+            <button class="back-btn" onclick="navigate('main-menu')">↩</button>
+            <h2 class="title" style="font-size: 20px; margin-top: 10px; background-color: var(--primary-color); color: white; padding: 15px;">Nosotros</h2>
+            
+            <div style="text-align: center; padding: 20px 0; background: white;">
+                <img src="PaginaPrincipal.jpg" alt="Logo Principal" style="width: 150px; border-radius: 20px;">
+            </div>
+            
+            <div style="padding: 20px; text-align: center;">
+                <p style="font-size: 13px; color: #444; margin-bottom: 20px; line-height: 1.5;">
+                    Somos una Clínica Veterinaria dedicada al cuidado integral y adopción de las mascotas que busca incrementar el número de adopciones en Lima.
+                </p>
+                
+                <h3 style="color: var(--secondary-color); margin-bottom: 20px; font-size: 20px;">Testimonios</h3>
+                
+                <div style="background: white; border-radius: 15px; padding: 15px; margin-bottom: 20px; box-shadow: var(--shadow);">
+                    <img src="testimonios.jpg" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;">
+                    <p style="font-size: 12px; color: #666; font-style: italic;">"Gracias a Animal House encontramos a nuestro mejor amigo. El proceso fue increíble."</p>
+                </div>
+
+                <div style="background: white; border-radius: 15px; padding: 15px; margin-bottom: 30px; box-shadow: var(--shadow);">
+                    <img src="testimonios1..jpg" alt="Persona junto a su perro" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;">
+                    <p style="font-size: 12px; color: #666; font-style: italic;">"Una labor maravillosa, adoptamos y estamos muy felices de haberle dado un hogar."</p>
+                </div>
+
+                <h3 style="color: var(--secondary-color); margin-bottom: 15px;">Síguenos</h3>
+                
+                <div class="social-container">
+                    <a href="https://www.facebook.com/clinicaveterinarianimalhouse/?locale=es_LA" target="_blank" rel="noopener noreferrer" class="social-btn btn-fb" aria-label="Facebook">
+                        <img src="https://cdn.simpleicons.org/facebook/1877F2" alt="Facebook">
+                    </a>
+                    <a href="https://www.instagram.com/vet.animal_house" target="_blank" rel="noopener noreferrer" class="social-btn btn-ig" aria-label="Instagram">
+                        <img src="https://cdn.simpleicons.org/instagram/E4405F" alt="Instagram">
+                    </a>
+                    <a href="https://wa.link/dxuqnz" target="_blank" rel="noopener noreferrer" class="social-btn btn-wsp" aria-label="WhatsApp">
+                        <img src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WhatsApp">
+                    </a>
+                </div>
+                <br><br>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function navigate(viewId) {
+            const views = document.querySelectorAll('.view');
+            views.forEach(view => { view.classList.remove('active'); });
+            
+            const targetView = document.getElementById(viewId);
+            if(targetView) {
+                targetView.classList.add('active');
+                targetView.style.opacity = '0';
+                setTimeout(() => {
+                    targetView.style.transition = 'opacity 0.2s ease';
+                    targetView.style.opacity = '1';
+                }, 10);
+                targetView.scrollTop = 0;
+            }
+        }
+
+        function showAdoptInfo(petId) {
+            const pets = {
+                beto: {
+                    image: 'adoptame.png',
+                    name: 'Beto',
+                    description: 'Beto es un perrito alegre y cariñoso que busca una familia responsable que le brinde un hogar lleno de amor.',
+                    age: '3 años',
+                    sex: 'Macho ♂',
+                    size: 'Pequeño 🐾',
+                    health: 'Óptima'
+                },
+                luna: {
+                    image: 'adoptame1.png',
+                    name: 'Luna',
+                    description: 'Luna es una perrita muy tierna y cariñosa, tiene un comportamiento muy tranquilo y amoroso, necesita atención y mucho cariño.',
+                    age: '2 años',
+                    sex: 'Hembra ♀',
+                    size: 'Mediano 🐾',
+                    health: 'Óptima'
+                }
+            };
+
+            const pet = pets[petId];
+            if (!pet) return;
+
+            document.getElementById('adopt-info-image').src = pet.image;
+            document.getElementById('adopt-info-image').alt = `Imagen de ${pet.name}`;
+            document.getElementById('adopt-info-name').textContent = pet.name;
+            document.getElementById('adopt-info-description').textContent = pet.description;
+            document.getElementById('adopt-info-age').textContent = pet.age;
+            document.getElementById('adopt-info-sex').textContent = pet.sex;
+            document.getElementById('adopt-info-size').textContent = pet.size;
+            document.getElementById('adopt-info-health').textContent = pet.health;
+            navigate('adopt-info');
+        }
+
+        function showSponsorInfo(petId) {
+            const pets = {
+                max: {
+                    image: 'apadriname1.png',
+                    name: 'Max',
+                    description: 'Max fue rescatado de las calles, es un perrito muy juguetón que necesita apoyo para sus vacunas y alimentación diaria.',
+                    age: '1 año',
+                    size: 'Pequeño',
+                    health: 'Estable'
+                },
+                rocky: {
+                    image: 'apadriname2.png',
+                    name: 'Rocky',
+                    description: 'Rocky es un perrito cariñoso y juguetón que necesita apoyo para su alimentación, cuidados y controles veterinarios.',
+                    age: '2 años',
+                    size: 'Mediano',
+                    health: 'Óptima'
+                }
+            };
+
+            const pet = pets[petId];
+            if (!pet) return;
+
+            document.getElementById('sponsor-info-image').src = pet.image;
+            document.getElementById('sponsor-info-image').alt = `Imagen de ${pet.name}`;
+            document.getElementById('sponsor-info-name').textContent = pet.name;
+            document.getElementById('sponsor-info-description').textContent = pet.description;
+            document.getElementById('sponsor-info-age').textContent = pet.age;
+            document.getElementById('sponsor-info-size').textContent = pet.size;
+            document.getElementById('sponsor-info-health').textContent = pet.health;
+            navigate('apadrinar-info');
+        }
+
+        function loginApp() {
+            const emailInput = document.getElementById('login-email').value;
+            if(emailInput.includes('@gmail.com') || emailInput.includes('@hotmail.com')) {
+                navigate('main-menu');
+            } else {
+                alert('⚠️ Acceso denegado. Debe ingresar un correo válido de @gmail.com o @hotmail.com.');
+            }
+        }
+
+        function registerApp() {
+            alert('✅ Cuenta creada exitosamente. Por favor inicie sesión con su nuevo usuario.');
+            navigate('login');
+        }
+        
+        function submitAdopcion() {
+            alert('Gracias por su registro, nos estaremos comunicando contigo dentro de las 24 horas');
+            navigate('main-menu');
+        }
+
+        function submitPago() {
+            alert('Pago registrado con éxito');
+            navigate('main-menu');
+        }
+
+        function submitDenuncia() {
+            alert('Denuncia registrada, nos estaremos comunicando para su actualización');
+            navigate('lista-denuncias');
+        }
+    </script>
+</body>
+</html>
